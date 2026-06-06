@@ -1,40 +1,40 @@
 $ErrorActionPreference = "Stop"
 
-$BASE_URL = "https://raw.githubusercontent.com/Milanv2l/Autobuilder/main"
+$GITHUB_USER = "Milanv2l"
+$GITHUB_REPO = "Autobuilder"
+$BRANCH = "main"
+$BASE_URL = "https://raw.githubusercontent.com/$GITHUB_USER/$GITHUB_REPO/$BRANCH"
+
 $INSTALL_DIR = "$HOME\.autobuilder"
 $PYTHON_FILES = @("autobuilder.py", "core.py", "engine.py", "baremetal.py", "plugins.json")
 
 Write-Host "=== AUTOBUILDER PRO INSTALLATIE (WINDOWS) ===" -ForegroundColor Cyan
 
 # --- VRAAG 1: Installeren? ---
-$confirm = Read-Host "Wil je AutoBuilder Pro op dit systeem installeren? (j/n)"
-if ($confirm -notmatch "^[jJ](a|A)?$") {
+$confirm_install = Read-Host "Wil je AutoBuilder Pro op dit systeem installeren? (j/n)"
+if ($confirm_install -notmatch "^[jJ](a|A)?$") {
     Write-Host "Installatie geannuleerd door gebruiker." -ForegroundColor Yellow
     exit
 }
 
 # --- VRAAG 2: Docker Sandbox? ---
-$useDocker = Read-Host "Wil je gebruik maken van de veilige Docker container sandbox? (Aanbevolen) (j/n)"
-if ($useDocker -match "^[jJ](a|A)?$") {
-    if (!(Get-Command docker -ErrorAction SilentlyContinue)) {
-        Write-Host "⚡ Docker is niet geïnstalleerd. Installeren via Winget..." -ForegroundColor Yellow
-        winget install Docker.DockerDesktop --accept-package-agreements --accept-source-agreements
+$use_docker = Read-Host "Wil je gebruik maken van de veilige Docker container sandbox? (Aanbevolen) (j/n)"
+if ($use_docker -match "^[jJ](a|A)?$") {
+    if (Get-Command docker -ErrorAction SilentlyContinue) {
+        Write-Host "[OK] Docker is al geinstalleerd." -ForegroundColor Green
     } else {
-        Write-Host "✔ Docker is al geïnstalleerd." -ForegroundColor Green
+        Write-Host "[!] Docker niet gevonden." -ForegroundColor Yellow
+        Write-Host "Ga naar https://docs.docker.com/desktop/windows/ om Docker Desktop te installeren." -ForegroundColor Yellow
     }
 } else {
-    Write-Host "⚡ Docker installatie overgeslagen. AutoBuilder zal alleen via Bare-Metal werken." -ForegroundColor Yellow
-}
-
-# Python Check (Altijd nodig voor de host-menu's)
-if (!(Get-Command python -ErrorAction SilentlyContinue)) {
-    Write-Host "⚡ Python is niet geïnstalleerd! Installeren via Winget..." -ForegroundColor Yellow
-    winget install Python.Python.3.12 --silent --accept-package-agreements
+    Write-Host "[!] Docker installatie overgeslagen. AutoBuilder zal alleen via Bare-Metal werken." -ForegroundColor Yellow
 }
 
 # --- DOWNLOADS & INSTALLATIE ---
-Write-Host "`n❯ Bestanden downloaden naar $INSTALL_DIR..." -ForegroundColor Cyan
-if (!(Test-Path $INSTALL_DIR)) { New-Item -ItemType Directory -Path $INSTALL_DIR | Out-Null }
+Write-Host "`nBestanden downloaden naar $INSTALL_DIR..." -ForegroundColor Cyan
+if (-not (Test-Path -Path $INSTALL_DIR)) {
+    New-Item -ItemType Directory -Path $INSTALL_DIR | Out-Null
+}
 
 foreach ($file in $PYTHON_FILES) {
     Write-Host "  Downloaden: $file..."
@@ -44,21 +44,24 @@ foreach ($file in $PYTHON_FILES) {
 Write-Host "  Downloaden: update.ps1..."
 Invoke-WebRequest -Uri "$BASE_URL/Windows/update.ps1" -OutFile "$INSTALL_DIR\update.ps1" -UseBasicParsing
 
-# Maak een .cmd wrapper
-$CMD_FILE = "$INSTALL_DIR\autobuilder.cmd"
-"@echo off`npython `"%~dp0autobuilder.py`" %*" | Out-File -FilePath $CMD_FILE -Encoding ascii
-
-# Voeg toe aan PATH
-$USER_PATH = [Environment]::GetEnvironmentVariable("PATH", "User")
-if ($USER_PATH -notmatch [regex]::Escape($INSTALL_DIR)) {
-    [Environment]::SetEnvironmentVariable("PATH", "$USER_PATH;$INSTALL_DIR", "User")
-    Write-Host "✔ '$INSTALL_DIR' toegevoegd aan PATH." -ForegroundColor Green
+# Alias aanmaken in het PowerShell Profile
+$PROFILE_DIR = Split-Path -Parent $PROFILE
+if (-not (Test-Path -Path $PROFILE_DIR)) {
+    New-Item -ItemType Directory -Path $PROFILE_DIR | Out-Null
+}
+if (-not (Test-Path -Path $PROFILE)) {
+    New-Item -ItemType File -Path $PROFILE | Out-Null
 }
 
-Write-Host "`n✔ Installatie Voltooid! AutoBuilder wordt nu gestart..." -ForegroundColor Green
-Start-Sleep -Seconds 1
+$ALIAS_LINE = "Set-Alias -Name autobuilder -Value python -Option AllScope; function autobuilder { python `"$INSTALL_DIR\autobuilder.py`" }"
+$PROFILE_CONTENT = Get-Content $PROFILE -Raw -ErrorAction SilentlyContinue
 
-# --- START AUTOBUILDER ---
-# Zorg dat de huidige terminal de nieuwe PATH direct herkent voor deze sessie
-$env:PATH = "$env:PATH;$INSTALL_DIR"
-autobuilder
+if ($PROFILE_CONTENT -notmatch "function autobuilder") {
+    Add-Content -Path $PROFILE -Value "`n$ALIAS_LINE"
+    Write-Host "[OK] Commando 'autobuilder' toegevoegd aan je PowerShell profiel." -ForegroundColor Green
+}
+
+# --- AFRONDING ---
+Write-Host "`n[OK] Installatie Voltooid!" -ForegroundColor Green
+Write-Host "1. Sluit deze PowerShell en open een nieuwe (of typ 'pwsh' / 'powershell')." -ForegroundColor Yellow
+Write-Host "2. Typ daarna 'autobuilder' om de applicatie te starten!`n" -ForegroundColor Yellow
