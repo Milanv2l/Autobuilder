@@ -10,8 +10,15 @@ import core
 from core import UI, t
 import baremetal
 
-if os.name == 'nt':  # Check of het systeem Windows is
-    os.system('')    # Deze lege systeemroep activeert ANSI-kleuren in Windows
+# --- ULTIEME WINDOWS KLEUREN FIX ---
+if os.name == 'nt':
+    try:
+        import ctypes
+        kernel32 = ctypes.windll.kernel32
+        # Forceer Windows om ANSI-kleurcodes (VT100) te begrijpen
+        kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
+    except Exception:
+        pass
 
 def bootstrap_sandbox(target_path: Path, artifacts_path: Path, run_tests: bool, lang: str):
     if not shutil.which("docker"):
