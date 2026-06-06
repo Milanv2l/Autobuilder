@@ -1,4 +1,4 @@
-#!/bin/bash
+]#!/bin/bash
 set -e
 
 GITHUB_USER="Milanv2l"
@@ -11,15 +11,15 @@ PYTHON_FILES=("autobuilder.py" "core.py" "engine.py" "baremetal.py" "plugins.jso
 
 echo -e "\033[96m=== AUTOBUILDER PRO INSTALLATIE ===\033[0m"
 
-# --- VRAAG 1: Installeren? ---
-read -p "Wil je AutoBuilder Pro op dit systeem installeren? (j/n): " confirm_install
+# --- VRAAG 1: Installeren? (Nu met < /dev/tty fix) ---
+read -p "Wil je AutoBuilder Pro op dit systeem installeren? (j/n): " confirm_install < /dev/tty
 if [[ ! "$confirm_install" =~ ^[jJ](a|A)?$ ]]; then
     echo -e "\033[93mInstallatie geannuleerd door gebruiker.\033[0m"
     exit 0
 fi
 
-# --- VRAAG 2: Docker Sandbox? ---
-read -p "Wil je gebruik maken van de veilige Docker container sandbox? (Aanbevolen) (j/n): " use_docker
+# --- VRAAG 2: Docker Sandbox? (Nu met < /dev/tty fix) ---
+read -p "Wil je gebruik maken van de veilige Docker container sandbox? (Aanbevolen) (j/n): " use_docker < /dev/tty
 if [[ "$use_docker" =~ ^[jJ](a|A)?$ ]]; then
     if ! command -v docker &> /dev/null; then
         echo -e "\033[93m⚡ Docker niet gevonden. Installatie starten...\033[0m"
@@ -60,4 +60,4 @@ echo -e "\n\033[92m✔ Installatie Voltooid! AutoBuilder wordt nu gestart...\033
 sleep 1
 
 # --- START AUTOBUILDER ---
-python3 "$INSTALL_DIR/autobuilder.py"
+python3 "$INSTALL_DIR/autobuilder.py"[
