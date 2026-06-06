@@ -1,3 +1,5 @@
+//This is made using ai
+
 Optie 1: Installeren op Windows (10 of 11)
 
 Als je op een Windows computer werkt, gebruik je de PowerShell-methode:
