@@ -60,4 +60,4 @@ echo -e "\n\033[92m✔ Installatie Voltooid! AutoBuilder wordt nu gestart...\033
 sleep 1
 
 # --- START AUTOBUILDER ---
-python3 "$INSTALL_DIR/autobuilder.py"
+python3 "$INSTALL_DIR/autobuilder.py" < /dev/tty
