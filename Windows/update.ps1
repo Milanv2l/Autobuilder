@@ -1,5 +1,23 @@
 $ErrorActionPreference = "Stop"
 
+$GITHUB_USER = "Milanv2l"
+$GITHUB_REPO = "Autobuilder"
+$BRANCH = "main"
+$BASE_URL = "https://raw.githubusercontent.com/$GITHUB_USER/$GITHUB_REPO/$BRANCH"
+
+$INSTALL_DIR = "$HOME\.autobuilder"
+$PYTHON_FILES = @("autobuilder.py", "core.py", "engine.py", "baremetal.py", "plugins.json")
+
+Write-Host "=== AUTOBUILDER PRO UPDATE ===" -ForegroundColor Cyan
+Write-Host "Bestanden downloaden..." -ForegroundColor Cyan
+
+foreach ($file in $PYTHON_FILES) {
+    Write-Host "  Downloaden: $file..."
+    Invoke-WebRequest -Uri "$BASE_URL/$file" -OutFile "$INSTALL_DIR\$file" -UseBasicParsing
+}
+
+Write-Host "[OK] Alle bestanden zijn weer up-to-date!" -ForegroundColor Green$ErrorActionPreference = "Stop"
+
 # Locatie van jouw repository
 $BASE_URL = "https://raw.githubusercontent.com/Milanv2l/Autobuilder/main"
 # Lokale installatiemap
