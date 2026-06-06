@@ -11,14 +11,14 @@ PYTHON_FILES=("autobuilder.py" "core.py" "engine.py" "baremetal.py" "plugins.jso
 
 echo -e "\033[96m=== AUTOBUILDER PRO INSTALLATIE ===\033[0m"
 
-# --- VRAAG 1: Installeren? (Nu met < /dev/tty fix) ---
+# --- VRAAG 1: Installeren? ---
 read -p "Wil je AutoBuilder Pro op dit systeem installeren? (j/n): " confirm_install < /dev/tty
 if [[ ! "$confirm_install" =~ ^[jJ](a|A)?$ ]]; then
     echo -e "\033[93mInstallatie geannuleerd door gebruiker.\033[0m"
     exit 0
 fi
 
-# --- VRAAG 2: Docker Sandbox? (Nu met < /dev/tty fix) ---
+# --- VRAAG 2: Docker Sandbox? ---
 read -p "Wil je gebruik maken van de veilige Docker container sandbox? (Aanbevolen) (j/n): " use_docker < /dev/tty
 if [[ "$use_docker" =~ ^[jJ](a|A)?$ ]]; then
     if ! command -v docker &> /dev/null; then
@@ -27,7 +27,7 @@ if [[ "$use_docker" =~ ^[jJ](a|A)?$ ]]; then
         elif [ -x "$(command -v apt-get)" ]; then sudo apt-get update && sudo apt-get install -y docker.io
         elif [ -x "$(command -v pacman)" ]; then sudo pacman -S --noconfirm docker
         else echo -e "\033[91m✖ Kon pakketbeheerder niet bepalen. Installeer Docker handmatig.\033[0m"; exit 1; fi
-    else
+    else 
         echo -e "\033[92m✔ Docker is al geïnstalleerd.\033[0m"
     fi
 
@@ -56,9 +56,7 @@ if ! grep -q "alias autobuilder=" "$HOME/.bashrc"; then
     echo -e "\033[92m✔ Commando 'autobuilder' toegevoegd aan ~/.bashrc\033[0m"
 fi
 
-echo -e "\n\033[92m✔ Installatie Voltooid! AutoBuilder wordt nu gestart...\033[0m\n"
-sleep 1
-
-# --- START AUTOBUILDER ---
-exec < /dev/tty
-python3 "$INSTALL_DIR/autobuilder.py"
+# --- AFRONDING ---
+echo -e "\n\033[92m✔ Installatie Voltooid!\033[0m"
+echo -e "\033[93m1. Typ \033[1mbash\033[0m\033[93m en druk op Enter om je terminal te verversen.\033[0m"
+echo -e "\033[93m2. Typ daarna \033[1mautobuilder\033[0m\033[93m om de applicatie te starten!\033[0m\n"
